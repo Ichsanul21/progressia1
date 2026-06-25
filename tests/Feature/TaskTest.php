@@ -112,7 +112,7 @@ class TaskTest extends TestCase
     {
         $vendor = Vendor::factory()->create();
         $user = User::factory()->adminVendor()->create(['vendor_id' => $vendor->id]);
-        $project = Project::factory()->create(['vendor_id' => $vendor->id, 'progress' => 0]);
+        $project = Project::factory()->create(['vendor_id' => $vendor->id, 'status' => 'in_progress', 'progress' => 0]);
         $task = Task::factory()->create([
             'project_id' => $project->id,
             'vendor_id' => $vendor->id,
@@ -128,7 +128,6 @@ class TaskTest extends TestCase
         $this->put("/projects/{$project->id}/tasks/{$task->id}", [
             'name' => $task->name,
             'status' => 'done',
-            'progress' => 80,
             'progress_description' => 'Task completed successfully with all requirements.',
             'photos' => [$file, $file2, $file3],
         ])->assertRedirect();

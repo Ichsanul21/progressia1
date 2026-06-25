@@ -154,9 +154,15 @@ export default function TasksEdit({
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={submit} className="space-y-6">
+                            <p className="text-muted-foreground text-xs">
+                                Foto dan deskripsi hanya diperlukan jika ada perubahan status atau progress. Untuk mengubah nama/deskripsi/tanggal
+                                saja, biarkan kolom status dan progress tidak berubah.
+                            </p>
+
                             <div className="grid gap-2">
                                 <Label htmlFor="name">Task Name</Label>
                                 <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
+                                <p className="text-muted-foreground text-xs">Kosongkan jika tidak ingin mengubah.</p>
                                 <InputError message={errors.name} />
                             </div>
 
@@ -237,17 +243,26 @@ export default function TasksEdit({
                                 <InputError message={errors.progress} />
                             </div>
 
+                            <hr className="border-t" />
+
+                            <h2 className="text-muted-foreground text-sm font-semibold tracking-wide uppercase">
+                                Update Progress
+                                {!hasProgressChange && (
+                                    <span className="ml-2 text-xs font-normal normal-case">(ubah status atau progress untuk mengaktifkan)</span>
+                                )}
+                            </h2>
+
                             {hasProgressChange && (
                                 <div className="grid gap-2">
                                     <Label htmlFor="progress_description">
-                                        Description <span className="text-destructive">*</span>
+                                        Deskripsi <span className="text-destructive">*</span>
                                     </Label>
                                     <textarea
                                         id="progress_description"
                                         value={data.progress_description}
                                         onChange={(e) => setData('progress_description', e.target.value)}
                                         className="border-input bg-background ring-offset-background focus-visible:ring-ring flex h-24 w-full rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:outline-none"
-                                        placeholder="Describe the progress update..."
+                                        placeholder="Jelaskan update progress (min. 10 karakter)"
                                     />
                                     <InputError message={errors.progress_description} />
                                 </div>
@@ -272,7 +287,10 @@ export default function TasksEdit({
                                 <div className="grid gap-2">
                                     <Label htmlFor="task-photos" className="flex items-center gap-1.5">
                                         <Camera className="h-4 w-4" />
-                                        Photos {photosRequired && <span className="text-destructive">*</span>}
+                                        Foto {photosRequired && <span className="text-destructive">*</span>}
+                                        {!photosRequired && (
+                                            <span className="text-muted-foreground text-xs font-normal">(opsional, hanya untuk update progress)</span>
+                                        )}
                                         {isAdmin && administrativeUpdate && (
                                             <span className="text-muted-foreground text-xs">(opsional untuk admin)</span>
                                         )}
@@ -435,10 +453,7 @@ export default function TasksEdit({
                                 </div>
                             )}
 
-                            <Button
-                                type="submit"
-                                disabled={processing || (photosRequired && photos.length < TASK_PHOTO_MIN)}
-                            >
+                            <Button type="submit" disabled={processing || (photosRequired && photos.length < TASK_PHOTO_MIN)}>
                                 {processing && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
                                 Update Task
                             </Button>

@@ -316,7 +316,11 @@ class TaskController extends Controller
 
         $hasPhotos = ! empty($request->file('photos'));
 
-        DB::transaction(function () use ($request, $task, $validated, $hasPhotos, $bypassPhoto) {
+        DB::transaction(function () use ($request, $task, $validated, $hasPhotos, $bypassPhoto, $statusChanged) {
+            if ($statusChanged && ! $request->has('progress')) {
+                $task->applyStatusProgress($validated['status'] ?? null);
+            }
+
             $task->update($validated);
 
             if ($hasPhotos) {
@@ -372,8 +376,14 @@ class TaskController extends Controller
 
         $validated['updated_by'] = $user->id;
 
-        DB::transaction(function () use ($request, $task, $validated, $user) {
+        $statusOnlyChange = ! $request->has('progress');
+
+        DB::transaction(function () use ($request, $task, $validated, $user, $statusOnlyChange) {
             $task->update($validated);
+
+            if ($statusOnlyChange) {
+                $task->applyStatusProgress();
+            }
 
             if (! empty($request->file('photos'))) {
                 $update = $task->progressUpdates()->create([

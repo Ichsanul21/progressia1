@@ -147,8 +147,9 @@ class Task extends Model
         $this->updateQuietly(['progress' => round($avg)]);
     }
 
-    public function applyStatusProgress(): void
+    public function applyStatusProgress(?string $newStatus = null): void
     {
-        $this->updateQuietly(['progress' => self::STATUS_PROGRESS[$this->status] ?? 0]);
+        $status = $newStatus ?? $this->status;
+        $this->updateQuietly(['progress' => self::STATUS_PROGRESS[$status] ?? 0]);
     }
 }

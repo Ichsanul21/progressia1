@@ -1,18 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import {
-    ArrowLeft,
-    Camera,
-    Download,
-    History,
-    MessageSquare,
-    Paperclip,
-    Pencil,
-    RefreshCw,
-    Send,
-    Trash2,
-    TrendingUp,
-    Upload,
-} from 'lucide-react';
+import { ArrowLeft, Camera, Download, History, MessageSquare, Paperclip, Pencil, RefreshCw, Send, Trash2, TrendingUp, Upload } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 import ConfirmDialog from '@/components/confirm-dialog';
@@ -328,7 +315,6 @@ export default function TasksShow({
                                 {task.sub_tasks?.length === 0 && <p className="text-muted-foreground py-4 text-center text-sm">No sub-tasks yet.</p>}
                             </CardContent>
                         </Card>
-
 
                         <Card>
                             <CardHeader>

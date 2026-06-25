@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { type SharedData } from '@/types';
 import { router, usePage } from '@inertiajs/react';
 import { Camera, CheckCircle2, ChevronRight, Circle, History, LoaderCircle, Plus, Trash2, User, X } from 'lucide-react';
 import { FormEventHandler, useRef, useState } from 'react';
-import { type SharedData } from '@/types';
 
 export interface SubTaskData {
     id: number;

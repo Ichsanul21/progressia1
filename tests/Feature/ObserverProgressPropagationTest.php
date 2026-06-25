@@ -8,11 +8,72 @@ use App\Models\Task;
 use App\Models\User;
 use App\Models\Vendor;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class ObserverProgressPropagationTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_not_started_project_stays_at_zero_even_when_tasks_progress(): void
+    {
+        $vendor = Vendor::factory()->create();
+        $user = User::factory()->adminVendor()->create(['vendor_id' => $vendor->id]);
+        $project = Project::factory()->create([
+            'vendor_id' => $vendor->id,
+            'status' => 'not_started',
+            'progress' => 0,
+            'created_by' => $user->id,
+        ]);
+        $task = Task::factory()->create([
+            'project_id' => $project->id,
+            'vendor_id' => $vendor->id,
+            'status' => 'in_progress',
+            'progress' => 50,
+            'created_by' => $user->id,
+        ]);
+
+        $project->recalculateProgressFromTasks();
+        $this->assertEquals(0, $project->fresh()->progress);
+    }
+
+    public function test_task_progress_syncs_when_status_changes_via_controller(): void
+    {
+        $vendor = Vendor::factory()->create();
+        $user = User::factory()->adminVendor()->create(['vendor_id' => $vendor->id]);
+        Storage::fake('public');
+        $project = Project::factory()->create([
+            'vendor_id' => $vendor->id,
+            'status' => 'in_progress',
+            'progress' => 0,
+            'created_by' => $user->id,
+        ]);
+        $task = Task::factory()->create([
+            'project_id' => $project->id,
+            'vendor_id' => $vendor->id,
+            'status' => 'not_started',
+            'progress' => 0,
+            'created_by' => $user->id,
+        ]);
+
+        // Change status without sending explicit progress — should auto-sync
+        $this->actingAs($user)
+            ->put(route('projects.tasks.update', [$project, $task]), [
+                'name' => $task->name,
+                'status' => 'in_progress',
+                'progress_description' => 'Mulai mengerjakan task ini.',
+                'photos' => [
+                    UploadedFile::fake()->image('p1.jpg'),
+                    UploadedFile::fake()->image('p2.jpg'),
+                    UploadedFile::fake()->image('p3.jpg'),
+                ],
+            ])
+            ->assertRedirect();
+
+        $this->assertEquals('in_progress', $task->fresh()->status);
+        $this->assertEquals(25, $task->fresh()->progress);
+    }
 
     public function test_observer_propagates_full_chain(): void
     {

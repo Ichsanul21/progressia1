@@ -824,7 +824,7 @@ export default function ProjectsShow({
                                     <CardTitle className="text-base">Description</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-muted-foreground text-sm whitespace-pre-wrap break-words">{project.description}</p>
+                                    <p className="text-muted-foreground text-sm break-words whitespace-pre-wrap">{project.description}</p>
                                 </CardContent>
                             </Card>
                         )}
@@ -961,8 +961,12 @@ export default function ProjectsShow({
                                                                             </span>
                                                                         ) : revealedPasswords[link.id] ? (
                                                                             <div className="space-y-1">
-                                                                                <p className="text-muted-foreground text-[10px] uppercase">Password</p>
-                                                                                <code className="font-mono text-xs">{revealedPasswords[link.id]}</code>
+                                                                                <p className="text-muted-foreground text-[10px] uppercase">
+                                                                                    Password
+                                                                                </p>
+                                                                                <code className="font-mono text-xs">
+                                                                                    {revealedPasswords[link.id]}
+                                                                                </code>
                                                                             </div>
                                                                         ) : (
                                                                             <span className="text-xs">Hover untuk memuat password</span>
@@ -1292,9 +1296,7 @@ export default function ProjectsShow({
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Password Berhasil Direset</DialogTitle>
-                        <DialogDescription>
-                            Password lama sudah tidak berlaku. Berikan password baru ini ke client.
-                        </DialogDescription>
+                        <DialogDescription>Password lama sudah tidak berlaku. Berikan password baru ini ke client.</DialogDescription>
                     </DialogHeader>
 
                     {resetLink && (

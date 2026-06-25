@@ -118,12 +118,7 @@ export default function PublicReport({ token, project, vendor, rab_summary, phas
     };
 
     const downloadReport = (format: 'pdf' | 'csv') => {
-        const a = document.createElement('a');
-        a.href = `/r/${token}/${format}`;
-        a.download = `laporan-${project.name}.${format}`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        window.location.href = `/r/${token}/${format}`;
     };
 
     return (
