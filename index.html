@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progressia — Standardize Your Progress</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-deep: #06090d;
+      --bg-surface: #0c1117;
+      --bg-elevated: #131a23;
+      --fg-primary: #f0f4f8;
+      --fg-secondary: #8899a8;
+      --fg-muted: #4a5a6a;
+      --accent-cyan: #00d4ff;
+      --accent-blue: #0088ff;
+      --accent-glow: rgba(0, 212, 255, 0.2);
+      --glass-bg: rgba(19, 26, 35, 0.65);
+      --glass-border: rgba(136, 153, 168, 0.15);
+      --glass-highlight: rgba(255, 255, 255, 0.05);
+      --shadow-card: 0 20px 50px rgba(0, 0, 0, 0.5);
+      --btn-shadow: 0 5px 0 #0099bb;
+      --gradient-body: radial-gradient(circle at 50% 0%, #111827 0%, #06090d 100%);
+    }
+
+    /* Light Mode Variables */
+    html.light-mode {
+      --bg-deep: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-elevated: #f1f5f9;
+      --fg-primary: #0f172a;
+      --fg-secondary: #475569;
+      --fg-muted: #94a3b8;
+      --accent-cyan: #06b6d4;
+      --accent-blue: #0284c7;
+      --accent-glow: rgba(6, 182, 212, 0.15);
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(148, 163, 184, 0.2);
+      --glass-highlight: rgba(255, 255, 255, 0.9);
+      --shadow-card: 0 20px 40px rgba(0, 0, 0, 0.06);
+      --btn-shadow: 0 5px 0 #0891b2;
+      --gradient-body: radial-gradient(circle at 50% 0%, #ecfeff 0%, #f8fafc 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    html, body {
+      overflow-x: hidden;
+      max-width: 100vw;
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: var(--gradient-body);
+      background-color: var(--bg-deep);
+      color: var(--fg-primary);
+      line-height: 1.6;
+      overflow-y: hidden;
+      transition: background 0.5s ease, color 0.4s ease;
+    }
+
+    body.loaded { overflow-y: auto; }
+
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* --- NAVBAR --- */
+    nav {
+      position: fixed;
+      top: 0; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      width: 100%; 
+      z-index: 50;
+      padding: 1rem 1.5rem;
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      background: transparent;
+      border-radius: 0; 
+      border: none;
+      display: flex;
+      justify-content: center; 
+    }
+
+    nav.scrolled {
+      background: linear-gradient(to bottom right, var(--glass-bg), rgba(255,255,255,0.05)); 
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1), inset 0 1px 0 var(--glass-highlight);
+      border-radius: 999px; 
+      width: 90%;
+      max-width: 1000px;
+      top: 1.5rem;
+      padding: 0.75rem 2rem;
+    }
+
+    html:not(.light-mode) nav.scrolled {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4), 0 0 0 1px var(--glass-border);
+    }
+
+    .nav-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 1280px;
+    }
+
+    /* --- SPLASH SCREEN --- */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: var(--bg-deep);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+      transition: background 0.5s ease;
+    }
+
+    .door-panel {
+      position: absolute;
+      top: 0;
+      width: 50%;
+      height: 100%;
+      background: var(--bg-deep);
+      z-index: 10;
+      transition: transform 1.5s cubic-bezier(0.76, 0, 0.24, 1), background 0.5s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .door-left { left: 0; }
+    .door-right { right: 0; }
+
+    .door-left::after, .door-right::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 3px; background: var(--accent-cyan); box-shadow: 0 0 20px var(--accent-cyan);
+      opacity: 0; transition: opacity 0.5s ease;
+    }
+    .door-left::after { right: 0; }
+    .door-right::after { left: 0; }
+
+    body.loaded .door-panel::after { opacity: 1; }
+    body.loaded .door-left { transform: translateX(-100%); }
+    body.loaded .door-right { transform: translateX(100%); }
+
+    .boot-container {
+      position: relative;
+      z-index: 20;
+      text-align: center;
+      width: 300px;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      padding: 0 20px; 
+    }
+
+    body.loaded .boot-container { opacity: 0; transform: scale(0.9); pointer-events: none; }
+
+    .boot-logo {
+      width: 80px; height: 80px;
+      margin: 0 auto 2rem;
+      border: 2px solid var(--accent-cyan);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: logo-pulse 2s infinite;
+    }
+    
+    @keyframes logo-pulse {
+      0%, 100% { box-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+      50% { box-shadow: 0 0 40px var(--accent-glow); }
+    }
+
+    .logo-path {
+      stroke: var(--accent-cyan);
+      stroke-width: 2;
+      fill: none;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: draw-path 2s ease forwards;
+    }
+    
+    @keyframes draw-path { to { stroke-dashoffset: 0; } }
+
+    .scan-line {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
+      animation: scan-down 2s linear infinite;
+      opacity: 0.5;
+    }
+    
+    @keyframes scan-down {
+      0% { top: 0%; opacity: 0; }
+      10% { opacity: 0.8; }
+      90% { opacity: 0.8; }
+      100% { top: 100%; opacity: 0; }
+    }
+
+    .boot-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--fg-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      height: 20px;
+      overflow: hidden;
+    }
+
+    .boot-progress-bar {
+      width: 100%;
+      height: 2px;
+      background: var(--bg-elevated);
+      margin-top: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .boot-progress-fill {
+      height: 100%;
+      background: var(--accent-cyan);
+      width: 0%;
+      box-shadow: 0 0 10px var(--accent-cyan);
+      transition: width 0.2s linear;
+    }
+
+    .splash-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(var(--glass-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.3;
+      animation: grid-zoom 20s linear infinite;
+    }
+    
+    @keyframes grid-zoom {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    /* --- MAIN CONTENT STYLES --- */
+    .swiss-grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 1.5rem;
+    }
+
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 2px;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.4s ease, border-color 0.4s ease;
+    }
+
+    .glass-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--glass-highlight), transparent);
+    }
+
+    .geo-bg {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .geo-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(var(--glass-border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--glass-border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: grid-move 20s linear infinite;
+      opacity: 0.4;
+    }
+
+    @keyframes grid-move {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(60px); }
+    }
+
+    .geo-glow {
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      filter: blur(100px);
+      animation: pulse-glow 6s ease-in-out infinite alternate;
+    }
+    
+    @media (min-width: 768px) { .geo-glow { width: 800px; height: 800px; } }
+
+    @keyframes pulse-glow {
+      0% { opacity: 0.3; transform: scale(1); }
+      100% { opacity: 0.7; transform: scale(1.3); }
+    }
+
+    .headline-xl {
+      font-size: clamp(2.5rem, 8vw, 7rem);
+      font-weight: 700;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+    }
+
+    .headline-lg {
+      font-size: clamp(1.75rem, 5vw, 4rem);
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .accent-line {
+      width: 40px;
+      height: 2px;
+      background: var(--accent-cyan);
+      animation: line-grow 1s ease-out forwards;
+      transform-origin: left;
+    }
+    
+    @media (min-width: 640px) { .accent-line { width: 60px; } }
+    @keyframes line-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    .accent-dot {
+      width: 8px; height: 8px;
+      background: var(--accent-cyan);
+      border-radius: 1px;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.5; }
+    }
+
+    /* --- BUTTONS --- */
+    .btn-primary {
+      background: var(--accent-cyan);
+      color: #ffffff;
+      font-weight: 700;
+      padding: 0.7rem 1.2rem;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      border-radius: 2px;
+      transform: translateY(0);
+      box-shadow: var(--btn-shadow), 0 8px 15px rgba(0,0,0,0.2);
+      transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 0 var(--btn-shadow), 0 15px 30px rgba(0,0,0,0.2), 0 0 30px var(--accent-glow);
+    }
+
+    .btn-primary:active {
+      transform: translateY(2px);
+      box-shadow: 0 2px 0 var(--btn-shadow), 0 3px 8px rgba(0,0,0,0.2);
+    }
+    
+    .btn-primary:focus-visible { outline: 2px solid var(--fg-primary); outline-offset: 2px; }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--fg-primary);
+      font-weight: 600;
+      padding: 0.7rem 1.2rem;
+      border: 1px solid var(--glass-border);
+      cursor: pointer;
+      position: relative;
+      outline: none;
+      border-radius: 2px;
+      transform: translateY(0);
+      box-shadow: 0 5px 0 rgba(0,0,0,0.05);
+      transition: all 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+      white-space: nowrap;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent-cyan);
+      background: rgba(0, 212, 255, 0.05);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 0 rgba(0, 0, 0, 0.05), 0 15px 30px rgba(0,0,0,0.1), 0 0 25px var(--accent-glow);
+    }
+
+    .btn-secondary:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(255,255,255,0.1); }
+
+    /* Icon Buttons */
+    .btn-icon {
+        background: transparent;
+        border: 1px solid var(--glass-border);
+        color: var(--fg-secondary);
+        width: 36px; height: 36px;
+        border-radius: 4px;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-icon:hover {
+        border-color: var(--accent-cyan); color: var(--accent-cyan);
+        background: rgba(0, 212, 255, 0.1);
+    }
+
+    /* Mobile Menu */
+    .mobile-nav {
+        position: fixed; top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: var(--bg-deep);
+        backdrop-filter: blur(20px);
+        z-index: 40;
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2rem;
+        transform: translateX(-100%);
+        transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+    }
+    
+    .mobile-nav.open { transform: translateX(0); }
+    
+    .mobile-nav a {
+        color: var(--fg-primary);
+        font-size: 1.5rem; font-weight: 600;
+        text-decoration: none;
+        position: relative;
+    }
+    
+    .mobile-nav a::after {
+        content: ''; position: absolute; bottom: -5px; left: 0; width: 0; height: 2px;
+        background: var(--accent-cyan); transition: width 0.3s ease;
+    }
+    
+    .mobile-nav a:hover::after { width: 100%; }
+
+    /* Burger Menu Animation */
+    .menu-icon {
+        width: 24px; height: 20px; position: relative; cursor: pointer; z-index: 50;
+    }
+    
+    .menu-icon span {
+        display: block; position: absolute; height: 2px; width: 100%;
+        background: var(--fg-secondary); opacity: 1; left: 0;
+        transform: rotate(0deg); transition: .25s ease-in-out;
+    }
+    
+    .menu-icon span:nth-child(1) { top: 0px; }
+    .menu-icon span:nth-child(2) { top: 9px; width: 70%; }
+    .menu-icon span:nth-child(3) { top: 18px; }
+    
+    .menu-icon.open span:nth-child(1) { top: 9px; transform: rotate(135deg); }
+    .menu-icon.open span:nth-child(2) { opacity: 0; left: -60px; }
+    .menu-icon.open span:nth-child(3) { top: 9px; transform: rotate(-135deg); }
+
+    /* Reveal Animation */
+    .reveal {
+      opacity: 0;
+      transform: translateY(60px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    .reveal-stagger > * {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .reveal-stagger.visible > *:nth-child(1) { transition-delay: 0ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.visible > *:nth-child(2) { transition-delay: 80ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.visible > *:nth-child(3) { transition-delay: 160ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.visible > *:nth-child(4) { transition-delay: 240ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.visible > *:nth-child(5) { transition-delay: 320ms; opacity: 1; transform: translateY(0); }
+    .reveal-stagger.visible > *:nth-child(6) { transition-delay: 400ms; opacity: 1; transform: translateY(0); }
+    
+    /* Utilities */
+    .nav-link-d {
+      position: relative;
+      color: var(--fg-secondary);
+      transition: color 0.2s ease;
+      display: none;
+    }
+    
+    @media (min-width: 768px) { .nav-link-d { display: block; } }
+    
+    .nav-link-d::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 1px;
+      background: var(--accent-cyan); transition: width 0.3s ease;
+    }
+    .nav-link-d:hover { color: var(--fg-primary); }
+    .nav-link-d:hover::after { width: 100%; }
+
+    .capacity-bar {
+      height: 4px; background: var(--bg-elevated); border-radius: 2px; overflow: hidden; position: relative;
+    }
+    
+    .capacity-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan));
+      width: 0%;
+      transition: width 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+      position: relative;
+    }
+
+    .capacity-fill::after {
+      content: ''; position: absolute; right: 0; top: 0; width: 30px; height: 100%;
+      background: linear-gradient(90deg, transparent, white);
+      animation: data-flow 2s linear infinite; opacity: 0.6;
+    }
+
+    @keyframes data-flow {
+      0% { transform: translateX(-100%); opacity: 0; }
+      50% { opacity: 0.6; }
+      100% { transform: translateX(500%); opacity: 0; }
+    }
+
+    .glass-panel {
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .glass-panel:hover {
+      transform: translateY(-8px) scale(1.01);
+      border-color: rgba(0, 212, 255, 0.3);
+      box-shadow: var(--shadow-card), 0 0 30px var(--accent-glow);
+    }
+
+    .arch-layer {
+      border-left: 2px solid var(--glass-border);
+      padding-left: 1.5rem; position: relative;
+    }
+
+    .arch-layer::before {
+      content: ''; position: absolute; left: -6px; top: 0; width: 10px; height: 10px;
+      background: var(--accent-cyan); border-radius: 1px;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    
+    .float-label { animation: label-float 5s ease-in-out infinite; }
+    
+    @keyframes label-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    #hero-canvas { position: absolute; inset: 0; z-index: 0; }
+    
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-deep); }
+    ::-webkit-scrollbar-thumb { background: var(--fg-muted); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+    .section-divider { height: 1px; background: linear-gradient(90deg, transparent, var(--glass-border), transparent); }
+    
+    /* Pricing Specific */
+    .pricing-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      transition: transform 0.4s ease, border-color 0.4s ease;
+    }
+    
+    .pricing-card:hover {
+       transform: translateY(-10px);
+       border-color: rgba(0, 212, 255, 0.3);
+    }
+    
+    .pricing-card.featured {
+      border: 1px solid var(--accent-cyan);
+      background: linear-gradient(180deg, var(--accent-glow) 0%, var(--bg-deep) 100%);
+      position: relative;
+    }
+    
+    @media (min-width: 768px) { .pricing-card.featured { transform: scale(1.05); z-index: 10; } }
+
+    .pricing-card.featured::before {
+      content: ''; position: absolute; inset: -2px;
+      background: linear-gradient(45deg, var(--accent-cyan), transparent, var(--accent-cyan));
+      z-index: -1; filter: blur(20px); opacity: 0.3;
+    }
+
+    .pricing-badge {
+      background: var(--accent-cyan); color: #ffffff; font-size: 10px; font-weight: 700;
+      padding: 4px 12px; position: absolute; top: 0; right: 20px;
+      clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    }
+    
+    .check-icon {
+      width: 16px; height: 16px; background: var(--accent-glow); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    
+    .neural-line {
+      stroke: var(--accent-cyan); stroke-width: 1.5; fill: none;
+      stroke-dasharray: 10, 20; animation: dash 30s linear infinite; opacity: 0.8;
+    }
+
+    @keyframes dash { to { stroke-dashoffset: -1000; } }
+    
+    /* --- LIGHT MODE PRICING FIXES --- */
+    html.light-mode .pricing-card .text-white { color: #0f172a !important; }
+    html.light-mode .pricing-card .text-gray-300 { color: #334155 !important; } 
+    html.light-mode .pricing-card .text-gray-400 { color: #475569 !important; } 
+    html.light-mode .pricing-card.featured {
+       background: linear-gradient(180deg, rgba(6, 182, 212, 0.08) 0%, rgba(255,255,255,0.9) 100%);
+       border-color: rgba(6, 182, 212, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splash-screen">
+    <div class="splash-grid"></div>
+    <div class="scan-line"></div>
+    
+    <div class="door-panel door-left">
+       <div class="absolute top-1/4 left-1/4 w-40 h-40 border border-cyan-400/20 rotate-45"></div>
+    </div>
+    
+    <div class="door-panel door-right">
+       <div class="absolute bottom-1/4 right-1/4 w-40 h-40 border border-cyan-400/20 rotate-12"></div>
+    </div>
+    
+    <div class="boot-container">
+      <div class="boot-logo">
+        <svg width="40" height="40" viewBox="0 0 40 40">
+          <rect x="4" y="20" width="12" height="16" class="logo-path" style="animation-delay: 0s;" />
+          <rect x="24" y="4" width="12" height="32" class="logo-path" style="animation-delay: 0.4s;" />
+          <rect x="18" y="12" width="4" height="24" fill="#00d4ff" opacity="0.5" class="logo-path" style="animation-delay: 0.8s;" />
+        </svg>
+      </div>
+      <div class="boot-text" id="boot-text">Initializing Core...</div>
+      <div class="boot-progress-bar">
+        <div class="boot-progress-fill" id="boot-progress"></div>
+      </div>
+      <div class="text-xs text-gray-600 mt-4 font-mono opacity-50">CLICK TO SKIP</div>
+    </div>
+  </div>
+
+  <!-- Mobile Nav Overlay -->
+  <div class="mobile-nav md:hidden" id="mobile-nav">
+    <a href="#architecture" class="lang-key" data-key="nav_architecture">Architecture</a>
+    <a href="#integration" class="lang-key" data-key="nav_integration">Integration</a>
+    <a href="#pricing" class="lang-key" data-key="nav_pricing">Pricing</a>
+    
+    <!-- Buttons Moved Here -->
+    <div class="flex flex-col gap-4 mt-8 w-full px-8">
+        <button class="btn-secondary w-full lang-key" data-key="btn_signin">Sign In</button>
+        <button class="btn-primary w-full lang-key" data-key="btn_access">Request Access</button>
+    </div>
+
+    <div class="flex gap-4 mt-8">
+        <button class="btn-icon" id="lang-toggle-mobile" aria-label="Change Language">
+            <span class="text-xs font-bold">EN</span>
+        </button>
+        <button class="btn-icon" id="theme-toggle-mobile" aria-label="Toggle Theme">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+        </button>
+    </div>
+  </div>
+
+  <!-- Main Application -->
+  <div id="app">
+    <!-- Navbar -->
+    <nav id="main-nav">
+      <div class="nav-inner">
+        <a href="#" class="flex items-center gap-3" aria-label="Progressia Home">
+          <div class="w-8 h-8 sm:w-10 sm:h-10 border border-cyan-400 flex items-center justify-center" style="border-radius: 2px; animation: pulse-dot 3s infinite;">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M2 10h6v8H2V10zM12 2h6v16h-6V2z" fill="#00d4ff"/>
+              <path d="M9 6h2v12H9V6z" fill="#00d4ff" opacity="0.5"/>
+            </svg>
+          </div>
+          <span class="font-semibold text-base sm:text-lg tracking-tight">Progressia</span>
+        </a>
+        
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex items-center gap-8">
+          <a href="#architecture" class="nav-link-d text-sm tracking-wide lang-key" data-key="nav_architecture">Architecture</a>
+          <a href="#integration" class="nav-link-d text-sm tracking-wide lang-key" data-key="nav_integration">Integration</a>
+          <a href="#pricing" class="nav-link-d text-sm tracking-wide lang-key" data-key="nav_pricing">Pricing</a>
+        </div>
+        
+        <div class="flex items-center gap-2 sm:gap-3">
+          <button class="btn-icon" id="lang-toggle" aria-label="Change Language">
+             <span class="text-xs font-bold">ID</span>
+          </button>
+          
+          <button class="btn-icon" id="theme-toggle" aria-label="Toggle Theme">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          </button>
+          
+          <!-- Removed Request Access Button from here as requested -->
+          <button class="btn-secondary text-xs sm:text-sm hidden sm:block lang-key" data-key="btn_signin">Sign In</button>
+          
+          <!-- Hamburger Menu (Visible only on mobile) -->
+          <div class="menu-icon md:hidden" id="burger-menu">
+              <span></span><span></span><span></span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen relative flex items-start pt-24 sm:pt-28 lg:pt-32" aria-label="Hero">
+      <canvas id="hero-canvas" aria-hidden="true"></canvas>
+      
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 relative z-10 w-full">
+        <div class="swiss-grid">
+          <div class="col-span-12 lg:col-span-8">
+            <div class="reveal">
+              <div class="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
+                <div class="accent-line"></div>
+                <span class="font-mono text-[10px] sm:text-xs tracking-widest text-cyan-400 whitespace-nowrap lang-key" data-key="hero_tagline">PRECISION PROJECT MANAGEMENT</span>
+              </div>
+            </div>
+            
+            <h1 class="headline-xl reveal" style="transition-delay: 150ms;">
+              <span class="lang-key" data-key="hero_title_1">Standardize</span><br>
+              <span class="text-cyan-400 lang-key" data-key="hero_title_2">Your Progress</span>
+            </h1>
+            
+            <p class="text-base sm:text-xl text-gray-400 mt-6 sm:mt-8 max-w-xl reveal lang-key" data-key="hero_desc" style="transition-delay: 300ms;">
+              Elite clarity for complex operations. A sophisticated command center where transparency meets precision.
+            </p>
+            
+            <div class="flex flex-wrap gap-3 sm:gap-4 mt-8 sm:mt-10 reveal" style="transition-delay: 450ms;">
+              <button class="btn-primary text-sm sm:text-base lang-key" data-key="btn_init">Initialize Platform</button>
+              <button class="btn-secondary text-sm sm:text-base lang-key" data-key="btn_view_arch">View Architecture</button>
+            </div>
+          </div>
+          
+          <div class="col-span-12 lg:col-span-4 mt-8 lg:mt-0 reveal" style="transition-delay: 600ms;">
+            <div class="glass-card glass-panel p-4 sm:p-6">
+              <div class="font-mono text-[10px] sm:text-xs text-gray-500 float-label lang-key" data-key="ops_status">OPERATIONAL STATUS</div>
+              <div class="mt-4 sm:mt-6 space-y-4 sm:space-y-5">
+                <div>
+                  <div class="flex justify-between items-center mb-1 sm:mb-2">
+                    <span class="text-xs sm:text-sm text-gray-400 lang-key" data-key="ops_throughput">System Throughput</span>
+                    <span class="text-[10px] sm:text-xs text-cyan-400 font-mono">OPTIMAL</span>
+                  </div>
+                  <div class="capacity-bar"><div class="capacity-fill" data-width="95"></div></div>
+                </div>
+                
+                <div>
+                  <div class="flex justify-between items-center mb-1 sm:mb-2">
+                    <span class="text-xs sm:text-sm text-gray-400 lang-key" data-key="ops_sync">Data Sync</span>
+                    <span class="text-[10px] sm:text-xs text-cyan-400 font-mono">REAL-TIME</span>
+                  </div>
+                  <div class="capacity-bar"><div class="capacity-fill" data-width="100"></div></div>
+                </div>
+                
+                <div>
+                  <div class="flex justify-between items-center mb-1 sm:mb-2">
+                    <span class="text-xs sm:text-sm text-gray-400 lang-key" data-key="ops_load">Infra Load</span>
+                    <span class="text-[10px] sm:text-xs text-cyan-400 font-mono">STABLE</span>
+                  </div>
+                  <div class="capacity-bar"><div class="capacity-fill" data-width="40"></div></div>
+                </div>
+
+                <div class="section-divider my-3 sm:my-4"></div>
+                
+                <div class="flex items-center gap-2">
+                  <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                  <span class="text-[10px] sm:text-xs text-gray-500 font-mono lang-key" data-key="ops_nominal">ALL SYSTEMS OPERATIONAL</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="py-16 sm:py-32 relative" aria-label="Architecture">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="swiss-grid">
+          <div class="col-span-12 lg:col-span-5 reveal">
+            <div class="flex items-center gap-4 mb-4 sm:mb-6">
+              <div class="accent-dot"></div>
+              <span class="font-mono text-[10px] sm:text-xs tracking-widest text-gray-500">01 / <span class="lang-key" data-key="sec_architecture">ARCHITECTURE</span></span>
+            </div>
+            <h2 class="headline-lg lang-key" data-key="arch_title">The Architecture of Monitoring</h2>
+            <p class="text-gray-400 mt-4 sm:mt-6 text-base sm:text-lg lang-key" data-key="arch_desc">
+              A multi-layered system designed for absolute transparency. Every stakeholder sees the same truth.
+            </p>
+          </div>
+          
+          <div class="col-span-12 lg:col-span-7 mt-8 lg:mt-0 reveal-stagger" id="arch-layers">
+            <div class="space-y-4 sm:space-y-6">
+              <div class="glass-card glass-panel p-4 sm:p-6 arch-item">
+                <div class="arch-layer">
+                  <span class="font-mono text-[10px] sm:text-xs text-cyan-400">LAYER 01</span>
+                  <h3 class="text-lg sm:text-xl font-semibold mt-2 lang-key" data-key="arch_l1_title">Field Input Layer</h3>
+                  <p class="text-gray-400 mt-2 text-xs sm:text-sm lang-key" data-key="arch_l1_desc">Standardized protocols ensure consistency across all input nodes.</p>
+                </div>
+              </div>
+              
+              <div class="glass-card glass-panel p-4 sm:p-6 arch-item">
+                <div class="arch-layer">
+                  <span class="font-mono text-[10px] sm:text-xs text-cyan-400">LAYER 02</span>
+                  <h3 class="text-lg sm:text-xl font-semibold mt-2 lang-key" data-key="arch_l2_title">Processing Core</h3>
+                  <p class="text-gray-400 mt-2 text-xs sm:text-sm lang-key" data-key="arch_l2_desc">Neural processing engine that validates and enriches raw data streams.</p>
+                </div>
+              </div>
+              
+              <div class="glass-card glass-panel p-4 sm:p-6 arch-item">
+                <div class="arch-layer">
+                  <span class="font-mono text-[10px] sm:text-xs text-cyan-400">LAYER 03</span>
+                  <h3 class="text-lg sm:text-xl font-semibold mt-2 lang-key" data-key="arch_l3_title">Visualization Interface</h3>
+                  <p class="text-gray-400 mt-2 text-xs sm:text-sm lang-key" data-key="arch_l3_desc">Stakeholder dashboards render complexity as clarity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transparency Section -->
+    <section id="transparency" class="py-16 sm:py-32 relative" aria-label="Transparency">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="swiss-grid">
+          <div class="col-span-12 reveal">
+            <div class="flex items-center gap-4 mb-4 sm:mb-6">
+              <div class="accent-dot"></div>
+              <span class="font-mono text-[10px] sm:text-xs tracking-widest text-gray-500">02 / <span class="lang-key" data-key="sec_trans">TRANSPARENCY</span></span>
+            </div>
+            <h2 class="headline-lg mb-3 sm:mb-4 lang-key" data-key="trans_title">Transparency, Automated.</h2>
+            <p class="text-gray-400 text-base sm:text-lg max-w-2xl mb-8 sm:mb-12 lang-key" data-key="trans_desc">
+              Stop chasing updates. Progressia creates a crystal-clear view of every project, automatically. No more friction, just clarity.
+            </p>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 reveal-stagger" id="transparency-cards">
+          <div class="glass-card glass-panel p-4 sm:p-6 group">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 border border-cyan-400/30 flex items-center justify-center group-hover:border-cyan-400 transition-all duration-300 group-hover:rotate-45" style="border-radius: 2px;">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 transition-transform duration-300 group-hover:-rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <span class="font-mono text-[10px] sm:text-xs text-gray-600">01</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold mt-3 sm:mt-4 lang-key" data-key="trans_1_title">Financial Clarity</h3>
+            <p class="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2 lang-key" data-key="trans_1_desc">See where every cent goes. No hidden costs, just visible value.</p>
+          </div>
+          
+          <div class="glass-card glass-panel p-4 sm:p-6 group">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 border border-cyan-400/30 flex items-center justify-center group-hover:border-cyan-400 transition-all duration-300 group-hover:rotate-45" style="border-radius: 2px;">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 transition-transform duration-300 group-hover:-rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+                </svg>
+              </div>
+              <span class="font-mono text-[10px] sm:text-xs text-gray-600">02</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold mt-3 sm:mt-4 lang-key" data-key="trans_2_title">Risk Visibility</h3>
+            <p class="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2 lang-key" data-key="trans_2_desc">Spot issues before they happen. AI monitors risks so you don't have to.</p>
+          </div>
+          
+          <div class="glass-card glass-panel p-4 sm:p-6 group">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 border border-cyan-400/30 flex items-center justify-center group-hover:border-cyan-400 transition-all duration-300 group-hover:rotate-45" style="border-radius: 2px;">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 transition-transform duration-300 group-hover:-rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </div>
+              <span class="font-mono text-[10px] sm:text-xs text-gray-600">03</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold mt-3 sm:mt-4 lang-key" data-key="trans_3_title">Team Alignment</h3>
+            <p class="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2 lang-key" data-key="trans_3_desc">Invite anyone, control everything. No chaos, just organized collaboration.</p>
+          </div>
+          
+          <div class="glass-card glass-panel p-4 sm:p-6 group">
+            <div class="flex items-start justify-between">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 border border-cyan-400/30 flex items-center justify-center group-hover:border-cyan-400 transition-all duration-300 group-hover:rotate-45" style="border-radius: 2px;">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 transition-transform duration-300 group-hover:-rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                </svg>
+              </div>
+              <span class="font-mono text-[10px] sm:text-xs text-gray-600">04</span>
+            </div>
+            <h3 class="text-base sm:text-lg font-semibold mt-3 sm:mt-4 lang-key" data-key="trans_4_title">Audit Trail</h3>
+            <p class="text-xs sm:text-sm text-gray-400 mt-1 sm:mt-2 lang-key" data-key="trans_4_desc">A permanent, unchangeable record. Trust is built on evidence, not promises.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Integration Section -->
+    <section id="integration" class="py-16 sm:py-32 relative overflow-hidden" aria-label="Integration">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="swiss-grid items-center">
+          <div class="col-span-12 lg:col-span-6 reveal">
+            <div class="flex items-center gap-4 mb-4 sm:mb-6">
+              <div class="accent-dot"></div>
+              <span class="font-mono text-[10px] sm:text-xs tracking-widest text-gray-500">03 / <span class="lang-key" data-key="sec_integ">INTEGRATION</span></span>
+            </div>
+            <h2 class="headline-lg lang-key" data-key="integ_title">Neural Processing</h2>
+            <p class="text-gray-400 mt-4 sm:mt-6 text-base sm:text-lg lang-key" data-key="integ_desc">
+              Beneath every glass panel lies a sophisticated neural network that processes and transforms raw field data.
+            </p>
+            
+            <div class="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
+              <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border border-gray-800 hover:border-cyan-400/50 transition-all duration-300 hover:translate-x-2 cursor-pointer">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 border border-cyan-400/30 flex items-center justify-center flex-shrink-0">
+                  <span class="font-mono text-xs sm:text-sm text-cyan-400">01</span>
+                </div>
+                <div>
+                  <div class="font-semibold text-sm sm:text-base lang-key" data-key="integ_1_title">Data Ingestion Engine</div>
+                  <div class="text-xs sm:text-sm text-gray-500 lang-key" data-key="integ_1_desc">High-velocity event processing</div>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border border-gray-800 hover:border-cyan-400/50 transition-all duration-300 hover:translate-x-2 cursor-pointer">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 border border-cyan-400/30 flex items-center justify-center flex-shrink-0">
+                  <span class="font-mono text-xs sm:text-sm text-cyan-400">02</span>
+                </div>
+                <div>
+                  <div class="font-semibold text-sm sm:text-base lang-key" data-key="integ_2_title">Anomaly Detection</div>
+                  <div class="text-xs sm:text-sm text-gray-500 lang-key" data-key="integ_2_desc">ML-powered pattern recognition</div>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 border border-gray-800 hover:border-cyan-400/50 transition-all duration-300 hover:translate-x-2 cursor-pointer">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 border border-cyan-400/30 flex items-center justify-center flex-shrink-0">
+                  <span class="font-mono text-xs sm:text-sm text-cyan-400">03</span>
+                </div>
+                <div>
+                  <div class="font-semibold text-sm sm:text-base lang-key" data-key="integ_3_title">Predictive Analytics</div>
+                  <div class="text-xs sm:text-sm text-gray-500 lang-key" data-key="integ_3_desc">Forward projection models</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-span-12 lg:col-span-6 mt-8 lg:mt-0 reveal">
+            <div class="glass-card p-4 sm:p-8 relative">
+              <svg class="w-full h-48 sm:h-64" viewBox="0 0 400 250" aria-hidden="true" id="neural-viz">
+                <g id="neural-connections"></g>
+                <g id="neural-nodes">
+                  <circle cx="50" cy="50" r="8" fill="#0c1117" stroke="#00d4ff" stroke-width="1.5"/>
+                  <circle cx="50" cy="100" r="8" fill="#0c1117" stroke="#00d4ff" stroke-width="1.5"/>
+                  <circle cx="50" cy="150" r="8" fill="#0c1117" stroke="#00d4ff" stroke-width="1.5"/>
+                  <circle cx="50" cy="200" r="8" fill="#0c1117" stroke="#00d4ff" stroke-width="1.5"/>
+                  <circle cx="150" cy="75" r="6" fill="#0c1117" stroke="#0088ff" stroke-width="1.5"/>
+                  <circle cx="150" cy="125" r="6" fill="#0c1117" stroke="#0088ff" stroke-width="1.5"/>
+                  <circle cx="150" cy="175" r="6" fill="#0c1117" stroke="#0088ff" stroke-width="1.5"/>
+                  <circle cx="250" cy="100" r="6" fill="#0c1117" stroke="#0088ff" stroke-width="1.5"/>
+                  <circle cx="250" cy="150" r="6" fill="#0c1117" stroke="#0088ff" stroke-width="1.5"/>
+                  <circle cx="350" cy="125" r="10" fill="#00d4ff" stroke="#00d4ff" stroke-width="2"/>
+                </g>
+              </svg>
+              
+              <div class="mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-4 text-center">
+                <div>
+                  <div class="font-mono text-base sm:text-xl text-cyan-400 lang-key" data-key="integ_stat_1_val">Active</div>
+                  <div class="text-[10px] sm:text-xs text-gray-500 lang-key" data-key="integ_stat_1_label">Node Mesh</div>
+                </div>
+                <div>
+                  <div class="font-mono text-base sm:text-xl text-cyan-400 lang-key" data-key="integ_stat_2_val">Dense</div>
+                  <div class="text-[10px] sm:text-xs text-gray-500 lang-key" data-key="integ_stat_2_label">Connections</div>
+                </div>
+                <div>
+                  <div class="font-mono text-base sm:text-xl text-cyan-400 lang-key" data-key="integ_stat_3_val">High</div>
+                  <div class="text-[10px] sm:text-xs text-gray-500 lang-key" data-key="integ_stat_3_label">Accuracy</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Pricing Section -->
+    <section id="pricing" class="py-16 sm:py-32 relative" aria-label="Pricing">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="text-center mb-12 sm:mb-16 reveal">
+          <div class="flex items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <div class="accent-line"></div>
+            <span class="font-mono text-[10px] sm:text-xs tracking-widest text-gray-500">04 / <span class="lang-key" data-key="sec_pricing">SCALE</span></span>
+            <div class="accent-line"></div>
+          </div>
+          <h2 class="headline-lg lang-key" data-key="pricing_title">Realize Your Vision Without Limits</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 items-start reveal-stagger">
+          
+          <!-- Starter Pack -->
+          <div class="pricing-card glass-panel p-6 sm:p-8 relative">
+            <div class="text-xs sm:text-sm font-mono text-gray-500 mb-2 lang-key" data-key="p1_name">STARTER PACK</div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-3xl sm:text-4xl font-bold">0 IDR</span>
+            </div>
+            <div class="text-[10px] sm:text-xs text-cyan-400 mt-1 font-mono lang-key" data-key="p1_dur">14 Day Free Trial</div>
+            <p class="text-gray-400 text-xs sm:text-sm mt-3 sm:mt-4 mb-4 sm:mb-6 lang-key" data-key="p1_desc">The first step towards total efficiency.</p>
+            
+            <div class="border-t border-gray-800 pt-4 sm:pt-6 space-y-2 sm:space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="check-icon"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                <span class="text-xs sm:text-sm text-gray-300 lang-key" data-key="p1_f1">3 Active Projects</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="check-icon"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                <span class="text-xs sm:text-sm text-gray-300 lang-key" data-key="p1_f2">Max 5 Team Members</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="check-icon"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                <span class="text-xs sm:text-sm text-gray-300 lang-key" data-key="p1_f3">1GB Cloud Storage</span>
+              </div>
+            </div>
+            
+            <button class="w-full mt-6 sm:mt-8 btn-secondary text-xs sm:text-sm lang-key" data-key="p1_btn">Start Trial</button>
+          </div>
+
+          <!-- Business Reguler -->
+          <div class="pricing-card featured glass-panel p-6 sm:p-8 relative">
+             <div class="pricing-badge lang-key" data-key="p2_badge">POPULAR</div>
+             <div class="text-xs sm:text-sm font-mono text-cyan-400 mb-2 lang-key" data-key="p2_name">BUSINESS REGULER</div>
+             <div class="flex items-baseline gap-1">
+               <span class="text-3xl sm:text-4xl font-bold text-white">199k</span>
+               <span class="text-gray-400 text-xs sm:text-sm">/bulan</span>
+             </div>
+             <p class="text-gray-300 text-xs sm:text-sm mt-3 sm:mt-4 mb-4 sm:mb-6 lang-key" data-key="p2_desc">Scale your business with confidence.</p>
+             
+             <div class="border-t border-cyan-400/30 pt-4 sm:pt-6 space-y-2 sm:space-y-3">
+               <div class="flex items-center gap-3">
+                 <div class="check-icon" style="background: rgba(0, 212, 255, 0.2);"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                 <span class="text-xs sm:text-sm text-white lang-key" data-key="p2_f1">5 Active Projects</span>
+               </div>
+               <div class="flex items-center gap-3">
+                 <div class="check-icon" style="background: rgba(0, 212, 255, 0.2);"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                 <span class="text-xs sm:text-sm text-white lang-key" data-key="p2_f2">Max 20 Team Members</span>
+               </div>
+               <div class="flex items-center gap-3">
+                 <div class="check-icon" style="background: rgba(0, 212, 255, 0.2);"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                 <span class="text-xs sm:text-sm text-white lang-key" data-key="p2_f3">Real-time Dashboard</span>
+               </div>
+             </div>
+             
+             <button class="w-full mt-6 sm:mt-8 btn-primary text-xs sm:text-sm lang-key" data-key="p2_btn">Select Plan</button>
+          </div>
+
+          <!-- Enterprise Pro -->
+          <div class="pricing-card glass-panel p-6 sm:p-8 relative">
+            <div class="text-xs sm:text-sm font-mono text-gray-500 mb-2 lang-key" data-key="p3_name">ENTERPRISE PRO</div>
+            <div class="flex items-baseline gap-1">
+              <span class="text-3xl sm:text-4xl font-bold">499k</span>
+              <span class="text-gray-400 text-xs sm:text-sm">/bulan</span>
+            </div>
+            <p class="text-gray-400 text-xs sm:text-sm mt-3 sm:mt-4 mb-4 sm:mb-6 lang-key" data-key="p3_desc">Full power for complex operations.</p>
+            
+            <div class="border-t border-gray-800 pt-4 sm:pt-6 space-y-2 sm:space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="check-icon"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                <span class="text-xs sm:text-sm text-gray-300 lang-key" data-key="p3_f1">10 Active Projects</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="check-icon"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                <span class="text-xs sm:text-sm text-gray-300 lang-key" data-key="p3_f2">Custom Branding</span>
+              </div>
+              <div class="flex items-center gap-3">
+                <div class="check-icon"><svg class="w-3 h-3 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg></div>
+                <span class="text-xs sm:text-sm text-gray-300 lang-key" data-key="p3_f3">Dedicated Server</span>
+              </div>
+            </div>
+            
+            <button class="w-full mt-6 sm:mt-8 btn-secondary text-xs sm:text-sm lang-key" data-key="p3_btn">Contact Sales</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-16 sm:py-32 relative" aria-label="Call to Action">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center reveal">
+        <div class="flex items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+          <div class="accent-line"></div>
+          <span class="font-mono text-[10px] sm:text-xs tracking-widest text-cyan-400">FINAL STEP</span>
+          <div class="accent-line"></div>
+        </div>
+        
+        <h2 class="headline-lg mb-4 sm:mb-6 lang-key" data-key="cta_title">Enter the Command Center</h2>
+        
+        <p class="text-base sm:text-xl text-gray-400 max-w-2xl mx-auto mb-8 sm:mb-10 lang-key" data-key="cta_desc">
+          Join the elite ecosystem where transparency is architecture.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+          <button class="btn-primary text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-4 lang-key" data-key="cta_btn_1">Request Platform Access</button>
+          <button class="btn-secondary text-base sm:text-lg px-8 sm:px-10 py-3 sm:py-4 lang-key" data-key="cta_btn_2">Schedule Demo</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-8 sm:py-12 border-t border-gray-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+          <div class="flex items-center gap-3">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 border border-cyan-400 flex items-center justify-center" style="border-radius: 2px;">
+              <svg width="16" height="16" viewBox="0 0 20 20" fill="none">
+                <path d="M2 10h6v8H2V10zM12 2h6v16h-6V2z" fill="#00d4ff"/>
+              </svg>
+            </div>
+            <span class="font-semibold text-sm sm:text-base">Progressia</span>
+          </div>
+          
+          <div class="flex items-center gap-6 sm:gap-8 text-xs sm:text-sm text-gray-500">
+            <a href="#" class="hover:text-cyan-400 transition-colors">Privacy</a>
+            <a href="#" class="hover:text-cyan-400 transition-colors">Terms</a>
+            <a href="#" class="hover:text-cyan-400 transition-colors">Contact</a>
+          </div>
+          
+          <div class="text-xs sm:text-sm text-gray-600 font-mono">System Nominal</div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Background Elements -->
+    <div class="geo-bg" aria-hidden="true">
+      <div class="geo-grid"></div>
+      <div class="geo-glow" style="top: -200px; left: -200px;"></div>
+      <div class="geo-glow" style="bottom: -200px; right: -200px; animation-delay: -3s;"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- LANG DATA ---
+    const translations = {
+        en: {
+            nav_architecture: "Architecture",
+            nav_integration: "Integration",
+            nav_pricing: "Pricing",
+            btn_signin: "Sign In",
+            btn_access: "Request Access",
+            hero_tagline: "PRECISION PROJECT MANAGEMENT",
+            hero_title_1: "Standardize",
+            hero_title_2: "Your Progress",
+            hero_desc: "Elite clarity for complex operations. A sophisticated command center where transparency meets precision.",
+            btn_init: "Initialize Platform",
+            btn_view_arch: "View Architecture",
+            ops_status: "OPERATIONAL STATUS",
+            ops_throughput: "System Throughput",
+            ops_sync: "Data Sync",
+            ops_load: "Infra Load",
+            ops_nominal: "ALL SYSTEMS OPERATIONAL",
+            sec_architecture: "ARCHITECTURE",
+            arch_title: "The Architecture of Monitoring",
+            arch_desc: "A multi-layered system designed for absolute transparency. Every stakeholder sees the same truth.",
+            arch_l1_title: "Field Input Layer",
+            arch_l1_desc: "Standardized protocols ensure consistency across all input nodes.",
+            arch_l2_title: "Processing Core",
+            arch_l2_desc: "Neural processing engine that validates and enriches raw data streams.",
+            arch_l3_title: "Visualization Interface",
+            arch_l3_desc: "Stakeholder dashboards render complexity as clarity.",
+            sec_trans: "TRANSPARENCY",
+            trans_title: "Transparency, Automated.",
+            trans_desc: "Stop chasing updates. Progressia creates a crystal-clear view of every project, automatically. No more friction, just clarity.",
+            trans_1_title: "Financial Clarity",
+            trans_1_desc: "See where every cent goes. No hidden costs, just visible value.",
+            trans_2_title: "Risk Visibility",
+            trans_2_desc: "Spot issues before they happen. AI monitors risks so you don't have to.",
+            trans_3_title: "Team Alignment",
+            trans_3_desc: "Invite anyone, control everything. No chaos, just organized collaboration.",
+            trans_4_title: "Audit Trail",
+            trans_4_desc: "A permanent, unchangeable record. Trust is built on evidence, not promises.",
+            sec_integ: "INTEGRATION",
+            integ_title: "Neural Processing",
+            integ_desc: "Beneath every glass panel lies a sophisticated neural network that processes and transforms raw field data.",
+            integ_1_title: "Data Ingestion Engine",
+            integ_1_desc: "High-velocity event processing",
+            integ_2_title: "Anomaly Detection",
+            integ_2_desc: "ML-powered pattern recognition",
+            integ_3_title: "Predictive Analytics",
+            integ_3_desc: "Forward projection models",
+            integ_stat_1_val: "Active",
+            integ_stat_1_label: "Node Mesh",
+            integ_stat_2_val: "Dense",
+            integ_stat_2_label: "Connections",
+            integ_stat_3_val: "High",
+            integ_stat_3_label: "Accuracy",
+            sec_pricing: "SCALE",
+            pricing_title: "Realize Your Vision Without Limits",
+            p1_name: "STARTER PACK",
+            p1_dur: "14 Day Free Trial",
+            p1_desc: "The first step towards total efficiency.",
+            p1_f1: "3 Active Projects",
+            p1_f2: "Max 5 Team Members",
+            p1_f3: "1GB Cloud Storage",
+            p1_btn: "Start Trial",
+            p2_badge: "POPULAR",
+            p2_name: "BUSINESS REGULER",
+            p2_desc: "Scale your business with confidence.",
+            p2_f1: "5 Active Projects",
+            p2_f2: "Max 20 Team Members",
+            p2_f3: "Real-time Dashboard",
+            p2_btn: "Select Plan",
+            p3_name: "ENTERPRISE PRO",
+            p3_desc: "Full power for complex operations.",
+            p3_f1: "10 Active Projects",
+            p3_f2: "Custom Branding",
+            p3_f3: "Dedicated Server",
+            p3_btn: "Contact Sales",
+            cta_title: "Enter the Command Center",
+            cta_desc: "Join the elite ecosystem where transparency is architecture.",
+            cta_btn_1: "Request Platform Access",
+            cta_btn_2: "Schedule Demo"
+        },
+        id: {
+            nav_architecture: "Arsitektur",
+            nav_integration: "Integrasi",
+            nav_pricing: "Harga",
+            btn_signin: "Masuk",
+            btn_access: "Minta Akses",
+            hero_tagline: "MANAJEMEN PROYEK PRESISI",
+            hero_title_1: "Standarisasi",
+            hero_title_2: "Progres Anda",
+            hero_desc: "Kejelasan elite untuk operasi yang kompleks. Pusat komando canggih di mana transparansi bertemu presisi.",
+            btn_init: "Inisialisasi Platform",
+            btn_view_arch: "Lihat Arsitektur",
+            ops_status: "STATUS OPERASIONAL",
+            ops_throughput: "Throughput Sistem",
+            ops_sync: "Sinkronisasi Data",
+            ops_load: "Beban Infra",
+            ops_nominal: "SEMUA SISTEM BERJALAN NORMAL",
+            sec_architecture: "ARSITEKTUR",
+            arch_title: "Arsitektur Pemantauan",
+            arch_desc: "Sistem multi-lapis yang dirancang untuk transparansi mutlak. Setiap pemangku kepentingan melihat kebenaran yang sama.",
+            arch_l1_title: "Lapisan Input Lapangan",
+            arch_l1_desc: "Protokol terstandarisasi memastikan konsistensi di semua node input.",
+            arch_l2_title: "Inti Pemrosesan",
+            arch_l2_desc: "Mesin pemrosesan neural yang memvalidasi dan memperkaya aliran data mentah.",
+            arch_l3_title: "Antarmuka Visualisasi",
+            arch_l3_desc: "Dasbor pemangku kepentingan merender kompleksitas menjadi kejelasan.",
+            sec_trans: "TRANSPARANSI",
+            trans_title: "Transparansi Tanpa Ribet.",
+            trans_desc: "Lupakan tanya-menanya soal update. Progressia menciptakan pandangan kristal jelas dari setiap proyek secara otomatis. Tanpa gesekan, hanya kejelasan.",
+            trans_1_title: "Kejelasan Finansial",
+            trans_1_desc: "Tahu ke mana uang mengalir. Tanpa biaya tersembunyi, hanya nilai yang terlihat.",
+            trans_2_title: "Visibilitas Risiko",
+            trans_2_desc: "Ketahui masalah sebelum terjadi. AI kami mengawasi risiko sehingga Anda tak perlu repot.",
+            trans_3_title: "Keselarasan Tim",
+            trans_3_desc: "Undang siapa saja, kendalikan segalanya. Tanpa kekacauan, hanya kolaborasi terstruktur.",
+            trans_4_title: "Jejak Audit",
+            trans_4_desc: "Catatan permanen yang tak bisa diubah. Kepercayaan dibangun di atas bukti, bukan janji.",
+            sec_integ: "INTEGRASI",
+            integ_title: "Pemrosesan Neural",
+            integ_desc: "Di balik setiap panel kaca terdapat jaringan neural canggih yang memproses dan mengubah data mentah.",
+            integ_1_title: "Mesin Ingesti Data",
+            integ_1_desc: "Pemrosesan event berkecepatan tinggi",
+            integ_2_title: "Deteksi Anomali",
+            integ_2_desc: "Pengenalan pola bertenaga ML",
+            integ_3_title: "Analitik Prediktif",
+            integ_3_desc: "Model proyeksi ke depan",
+            integ_stat_1_val: "Aktif",
+            integ_stat_1_label: "Node Mesh",
+            integ_stat_2_val: "Dens",
+            integ_stat_2_label: "Koneksi",
+            integ_stat_3_val: "Tinggi",
+            integ_stat_3_label: "Akurasi",
+            sec_pricing: "SKALA",
+            pricing_title: "Wujudkan Visi Anda Tanpa Batas",
+            p1_name: "PAKET PEMULA",
+            p1_dur: "Gratis 14 Hari",
+            p1_desc: "Langkah awal menuju efisiensi total.",
+            p1_f1: "3 Proyek Aktif",
+            p1_f2: "Maks 5 Anggota Tim",
+            p1_f3: "Penyimpanan Cloud 1GB",
+            p1_btn: "Mulai Uji Coba",
+            p2_badge: "POPULER",
+            p2_name: "BISNIS REGULER",
+            p2_desc: "Skalakan bisnis Anda dengan percaya diri.",
+            p2_f1: "5 Proyek Aktif",
+            p2_f2: "Maks 20 Anggota Tim",
+            p2_f3: "Dashboard Real-time",
+            p2_btn: "Pilih Paket",
+            p3_name: "ENTERPRISE PRO",
+            p3_desc: "Kekuatan penuh untuk operasi kompleks.",
+            p3_f1: "10 Proyek Aktif",
+            p3_f2: "Kustom Branding",
+            p3_f3: "Server Dedikasi",
+            p3_btn: "Hubungi Sales",
+            cta_title: "Masuk ke Pusat Komando",
+            cta_desc: "Bergabunglah dengan ekosistem elit tempat transparansi adalah arsitektur.",
+            cta_btn_1: "Minta Akses Platform",
+            cta_btn_2: "Jadwalkan Demo"
+        }
+    };
+
+    let currentLang = 'en';
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-key').forEach(el => {
+            const key = el.getAttribute('data-key');
+            if (translations[lang][key]) {
+                el.textContent = translations[lang][key];
+            }
+        });
+        const langText = document.querySelector('#lang-toggle span');
+        const langTextMobile = document.querySelector('#lang-toggle-mobile span');
+        const nextLang = lang === 'en' ? 'ID' : 'EN';
+        if(langText) langText.textContent = nextLang;
+        if(langTextMobile) langTextMobile.textContent = nextLang;
+    }
+
+    // --- THEME LOGIC ---
+    function toggleTheme() {
+      document.documentElement.classList.toggle('light-mode');
+    }
+
+    // --- MOBILE MENU LOGIC ---
+    function toggleMenu() {
+        const menu = document.getElementById('mobile-nav');
+        const icon = document.getElementById('burger-menu');
+        menu.classList.toggle('open');
+        icon.classList.toggle('open');
+    }
+    
+    // --- NAVBAR SCROLL LOGIC ---
+    const mainNav = document.getElementById('main-nav');
+    let lastScrollY = 0;
+    let ticking = false;
+
+    function updateNav() {
+        if (window.scrollY > 50) {
+            mainNav.classList.add('scrolled');
+        } else {
+            mainNav.classList.remove('scrolled');
+        }
+        ticking = false;
+    }
+
+    window.addEventListener('scroll', () => {
+        lastScrollY = window.scrollY;
+        if (!ticking) {
+            window.requestAnimationFrame(updateNav);
+            ticking = true;
+        }
+    });
+
+    // --- LOADER LOGIC ---
+    const splash = document.getElementById('splash-screen');
+    const bootText = document.getElementById('boot-text');
+    const bootProgress = document.getElementById('boot-progress');
+    
+    const bootSequence = [
+      "Initializing Neural Core...",
+      "Loading Interface...",
+      "Syncing Nodes...",
+      "Connection Ready",
+      "System Go"
+    ];
+
+    let currentStep = 0;
+    let isLoaded = false;
+
+    function openDoors() {
+      if(isLoaded) return;
+      isLoaded = true;
+      document.body.classList.add('loaded');
+      
+      setTimeout(() => {
+        if(splash) splash.style.display = 'none';
+        initRevealObservers(); 
+      }, 2000);
+    }
+
+    function runBootSequence() {
+      if (currentStep < bootSequence.length) {
+        bootText.textContent = bootSequence[currentStep];
+        const progressPercent = ((currentStep + 1) / bootSequence.length) * 100;
+        bootProgress.style.width = progressPercent + '%';
+        currentStep++;
+        setTimeout(runBootSequence, 300); 
+      } else {
+        setTimeout(openDoors, 400);
+      }
+    }
+
+    splash.addEventListener('click', () => {
+      currentStep = bootSequence.length; 
+      bootProgress.style.width = '100%';
+      openDoors();
+    });
+
+    if (document.readyState === 'complete') {
+      runBootSequence();
+    } else {
+      window.addEventListener('load', runBootSequence);
+    }
+    
+    setTimeout(() => {
+      if(!isLoaded) openDoors();
+    }, 5000);
+
+    // --- MAIN SITE LOGIC ---
+    
+    function initRevealObservers() {
+      const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) entry.target.classList.add('visible');
+        });
+      }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+      document.querySelectorAll('.reveal, .reveal-stagger').forEach(el => revealObserver.observe(el));
+
+      const barObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const bars = entry.target.querySelectorAll('.capacity-fill');
+            bars.forEach((bar, i) => {
+              const width = bar.dataset.width;
+              if (width) {
+                setTimeout(() => { bar.style.width = width + '%'; }, 200 + (i * 150));
+              }
+            });
+            barObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+
+      document.querySelectorAll('.glass-card, .border').forEach(el => {
+        if(el.querySelector('.capacity-fill')) barObserver.observe(el);
+      });
+    }
+
+    // Neural Network Visualization
+    function initNeuralViz() {
+      const connectionsGroup = document.getElementById('neural-connections');
+      if (!connectionsGroup) return;
+
+      const connections = [
+        { x1: 58, y1: 50, x2: 144, y2: 75 }, { x1: 58, y1: 50, x2: 144, y2: 125 },
+        { x1: 58, y1: 100, x2: 144, y2: 75 }, { x1: 58, y1: 100, x2: 144, y2: 125 },
+        { x1: 58, y1: 150, x2: 144, y2: 125 }, { x1: 58, y1: 150, x2: 144, y2: 175 },
+        { x1: 58, y1: 200, x2: 144, y2: 175 },
+        { x1: 156, y1: 75, x2: 244, y2: 100 }, { x1: 156, y1: 75, x2: 244, y2: 150 },
+        { x1: 156, y1: 125, x2: 244, y2: 100 }, { x1: 156, y1: 125, x2: 244, y2: 150 },
+        { x1: 156, y1: 175, x2: 244, y2: 150 },
+        { x1: 256, y1: 100, x2: 342, y2: 125 }, { x1: 256, y1: 150, x2: 342, y2: 125 },
+      ];
+
+      connections.forEach((conn) => {
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', conn.x1); line.setAttribute('y1', conn.y1);
+        line.setAttribute('x2', conn.x2); line.setAttribute('y2', conn.y2);
+        line.classList.add('neural-line');
+        connectionsGroup.appendChild(line);
+      });
+    }
+    initNeuralViz();
+
+    // Hero Canvas - Interactive Background
+    function initHeroCanvas() {
+      const canvas = document.getElementById('hero-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let mouse = { x: -1000, y: -1000 }; 
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initParticles();
+      }
+
+      function initParticles() {
+        particles = [];
+        const count = window.innerWidth < 768 ? 60 : 100;
+        
+        for (let i = 0; i < count; i++) {
+          particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 1.5,
+            vy: (Math.random() - 0.5) * 1.5,
+            size: Math.random() * 2.5 + 0.5,
+            opacity: Math.random() * 0.5 + 0.1
+          });
+        }
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(p => {
+          const dx = mouse.x - p.x;
+          const dy = mouse.y - p.y;
+          const dist = Math.sqrt(dx*dx + dy*dy);
+          
+          if(dist < 150) {
+            const force = (150 - dist) / 150 * 2;
+            p.vx -= (dx / dist) * force * 0.1;
+            p.vy -= (dy / dist) * force * 0.1;
+          }
+
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vx *= 0.99; 
+          p.vy *= 0.99;
+
+          if (p.x < 0) p.x = canvas.width;
+          if (p.x > canvas.width) p.x = 0;
+          if (p.y < 0) p.y = canvas.height;
+          if (p.y > canvas.height) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, Math.max(0.5, p.size), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(6, 182, 212, ${p.opacity}`;
+          ctx.fill();
+        });
+
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            
+            if (dist < 100) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(6, 182, 212, ${(1 - dist/100) * 0.15})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener('resize', resize);
+      window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+      window.addEventListener('touchmove', e => {
+          if(e.touches.length > 0) {
+              mouse.x = e.touches[0].clientX;
+              mouse.y = e.touches[0].clientY;
+          }
+      });
+      window.addEventListener('touchend', () => { mouse.x = -1000; mouse.y = -1000; });
+      
+      resize();
+      animate();
+    }
+    
+    initHeroCanvas();
+
+    // Smooth scroll
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if(target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+            const menu = document.getElementById('mobile-nav');
+            const icon = document.getElementById('burger-menu');
+            if(menu.classList.contains('open')) {
+                menu.classList.remove('open');
+                icon.classList.remove('open');
+            }
+        }
+      });
+    });
+    
+    // Event Listeners
+    document.getElementById('lang-toggle').addEventListener('click', () => setLanguage(currentLang === 'en' ? 'id' : 'en'));
+    document.getElementById('lang-toggle-mobile').addEventListener('click', () => setLanguage(currentLang === 'en' ? 'id' : 'en'));
+    document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+    document.getElementById('theme-toggle-mobile').addEventListener('click', toggleTheme);
+    document.getElementById('burger-menu').addEventListener('click', toggleMenu);
+    
+    // Initialize Lang
+    setLanguage('en');
+  </script>
+</body>
+</html>
