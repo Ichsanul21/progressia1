@@ -60,7 +60,7 @@ export default function TasksEdit({
     const TASK_PHOTO_MIN = 3;
     const TASK_PHOTO_MAX = 10;
 
-    const { data, setData, put, processing, errors } = useForm({
+    const form = useForm({
         name: task.name,
         description: task.description ?? '',
         phase_id: task.phase_id?.toString() ?? '',
@@ -78,6 +78,7 @@ export default function TasksEdit({
         recurrence_end_date: task.recurrence_end_date?.slice(0, 10) ?? '',
         administrative_update: false as boolean,
     });
+    const { data, setData, processing, errors } = form;
 
     const initialValues = useMemo(
         () => ({
@@ -122,8 +123,8 @@ export default function TasksEdit({
         if (isAdmin && administrativeUpdate) {
             changes.administrative_update = true;
         }
-        put(route('projects.tasks.update', [project.id, task.id]), {
-            data: changes,
+        form.transform(() => changes);
+        form.post(route('projects.tasks.update', [project.id, task.id]), {
             forceFormData: true,
             onSuccess: () => setPhotos([]),
         });

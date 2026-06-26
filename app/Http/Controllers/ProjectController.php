@@ -210,9 +210,7 @@ class ProjectController extends Controller
             ->where('vendor_id', $project->vendor_id)
             ->get(['id', 'name']);
 
-        $rabBudget = $project->rabItems()
-            ->selectRaw('COALESCE(SUM(volume * unit_price), 0) as total')
-            ->value('total') ?? 0;
+        $rabBudget = (float) ($project->rabItems()->toBase()->selectRaw('SUM(COALESCE(volume * unit_price, 0)) as total')->reorder()->value('total') ?? 0);
 
         $reportLinks = $project->reportLinks()
             ->active()

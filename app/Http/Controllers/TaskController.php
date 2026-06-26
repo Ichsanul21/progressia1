@@ -222,7 +222,8 @@ class TaskController extends Controller
             'progressUpdates' => fn($q) => $q->with('photos', 'createdBy:id,name')->latest(),
             'comments' => fn($q) => $q->with('user:id,name')->latest(),
             'attachments' => fn($q) => $q->with('uploader:id,name')->latest(),
-            'activityLogs' => fn($q) => $q->with('user:id,name')->latest()->limit(50),
+            // 'activityLogs' => fn($q) => $q->with('user:id,name')->latest()->limit(50),
+            'activityLogs' => fn($q) => $q->with('user:id,name')->latest(),
             'pendingApprovals',
         ]);
         $task->has_pending_approval = $task->hasPendingApproval;

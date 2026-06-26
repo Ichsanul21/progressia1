@@ -166,12 +166,6 @@ class Project extends Model
 
     public function recalculateProgressFromPhases(): void
     {
-        if ($this->status === 'not_started') {
-            static::withoutEvents(fn () => static::query()->whereKey($this->getKey())->update(['progress' => 0]));
-            $this->progress = 0;
-            return;
-        }
-
         $phases = $this->phases;
 
         if ($phases->isEmpty()) {
@@ -185,12 +179,6 @@ class Project extends Model
 
     public function recalculateProgressFromTasks(): void
     {
-        if ($this->status === 'not_started') {
-            static::withoutEvents(fn () => static::query()->whereKey($this->getKey())->update(['progress' => 0]));
-            $this->progress = 0;
-            return;
-        }
-
         $tasks = $this->tasks;
 
         if ($tasks->isEmpty()) {

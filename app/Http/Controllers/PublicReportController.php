@@ -90,6 +90,18 @@ class PublicReportController extends Controller
         $link->recordAccess();
         $data['access_count'] = $link->fresh()->access_count;
 
+        if (! empty($data['vendor']['logo']) && Storage::disk('public')->exists($data['vendor']['logo'])) {
+            $data['vendor']['logo_url'] = Storage::disk('public')->path($data['vendor']['logo']);
+        } else {
+            $data['vendor']['logo_url'] = null;
+        }
+
+        if (! empty($data['project']['cover_image']) && Storage::disk('public')->exists($data['project']['cover_image'])) {
+            $data['project']['cover_image_url'] = Storage::disk('public')->path($data['project']['cover_image']);
+        } else {
+            $data['project']['cover_image_url'] = null;
+        }
+
         $html = view('public.report-pdf', $data)->render();
 
         $options = new Options;
@@ -193,14 +205,13 @@ class PublicReportController extends Controller
             'clients:id,name,phone',
             'phases' => fn ($q) => $q->with(['tasks' => function ($q2) {
                 $q2->with([
-                    'progressUpdates' => fn ($q3) => $q3->with('photos')->latest()->limit(1),
+                    // 'progressUpdates' => fn ($q3) => $q3->with('photos')->latest()->limit(1),
+                    'progressUpdates' => fn ($q3) => $q3->with('photos')->latest(),
                 ])->orderBy('sort_order');
             }])->orderBy('sort_order'),
         ]);
 
-        $rabTotal = $project->rabItems()
-            ->selectRaw('COALESCE(SUM(volume * unit_price), 0) as total')
-            ->value('total') ?? 0;
+        $rabTotal = (float) ($project->rabItems()->toBase()->selectRaw('SUM(COALESCE(volume * unit_price, 0)) as total')->reorder()->value('total') ?? 0);
         $rabCount = $project->rabItems()->count();
 
         $whatsappPhone = $project->clients()->whereNotNull('phone')->orderBy('id')->first()?->phone;
